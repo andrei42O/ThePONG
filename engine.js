@@ -3,21 +3,50 @@ var canvasContext;
 var ballX;
 var ballY;
 var ballRadius = 20;
-var ballSpeedX = 10; // right by default
+var ballSpeedX = 5; 
 var ballSpeedY = 5;
+
+
+const PADDLEE_HEIGHT = 100;
+var paddleY;
+var paddleX;
+const PADDLE_WIDTH = 10;
 
 function initializeBallCoordinates() {
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
 }
 
+function initializePaddleCoordinates(){
+    paddleY = canvas.height / 2 - (PADDLEE_HEIGHT / 2);
+    paddleX = 10;
+}
+
 window.onload = function(){
     canvas =  document.getElementById('gameCanvas');
     canvasContext = canvas.getContext('2d');
     initializeBallCoordinates();
+    initializePaddleCoordinates();
     var fps = 288; 
-
+    
     setInterval(showEverything, 1000 / fps); /// 1000ms = 1s
+    
+    canvas.addEventListener('mousemove', 
+        function(evt){
+            var mousePos = calculateMousePosition(evt);
+            paddleY = mousePos.y - PADDLEE_HEIGHT / 2;
+        })
+}
+
+function calculateMousePosition(evt){
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+    var mouseX = evt.clientX - rect.left - root.scrollLeft;
+    var mouseY = evt.clientY - rect.top - root.scrollTop;
+    return {
+        x: mouseX,
+        y: mouseY
+    };
 }
 
 function showEverything(){
@@ -54,10 +83,16 @@ function recalculateBallCoordinates(){
     }
 }
 
+function drawPaddle(){
+    canvasContext.fillStyle = 'white'
+    canvasContext.fillRect(paddleX, paddleY, PADDLE_WIDTH, PADDLEE_HEIGHT);
+}
+
 function drawElements(){
     drawBackground();
-    console.log(ballX, ballY);
+    drawPaddle();
     colorCircle(ballX, ballY, ballRadius, 'white')
+    //console.log(ballX, ballY);
 }
 
 function drawBackground(){
