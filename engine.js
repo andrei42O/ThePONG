@@ -2,15 +2,15 @@ var canvas;
 var canvasContext; 
 var ballX;
 var ballY;
-var ballRadius = 20;
+const BALL_RADIUS = 20;
 var ballSpeedX = 5; 
 var ballSpeedY = 5;
+const FPS = 288;
 
-
-const PADDLEE_HEIGHT = 100;
+const PADDLE_HEIGHT = 100;
+const PADDLE_WIDTH = 10;
 var paddleY;
 var paddleX;
-const PADDLE_WIDTH = 10;
 
 function initializeBallCoordinates() {
     ballX = canvas.width / 2;
@@ -18,7 +18,7 @@ function initializeBallCoordinates() {
 }
 
 function initializePaddleCoordinates(){
-    paddleY = canvas.height / 2 - (PADDLEE_HEIGHT / 2);
+    paddleY = canvas.height / 2 - (PADDLE_HEIGHT / 2);
     paddleX = 10;
 }
 
@@ -27,18 +27,18 @@ window.onload = function(){
     canvasContext = canvas.getContext('2d');
     initializeBallCoordinates();
     initializePaddleCoordinates();
-    var fps = 288; 
     
-    setInterval(showEverything, 1000 / fps); /// 1000ms = 1s
+    setInterval(showEverything, 1000 / FPS); /// 1000ms = 1s
     
     canvas.addEventListener('mousemove', 
         function(evt){
             var mousePos = calculateMousePosition(evt);
-            paddleY = mousePos.y - PADDLEE_HEIGHT / 2;
+            paddleY = mousePos.y - PADDLE_HEIGHT / 2;
         })
 }
 
 function calculateMousePosition(evt){
+    /// This function calculates the current cursor position and returns it by 2 coordinates (x, y) which are integers
     var rect = canvas.getBoundingClientRect();
     var root = document.documentElement;
     var mouseX = evt.clientX - rect.left - root.scrollLeft;
@@ -54,53 +54,86 @@ function showEverything(){
     recalculateBallCoordinates();
 }
 
+
+function checkIfPaddleHit(){
+    /// The function checks if the ball hits the paddle
+    if (!(paddleX + PADDLE_WIDTH / 2 == ballX - BALL_RADIUS / 2))
+        return false;
+    if(!(ballY >= paddleY && ballY <= paddleY + PADDLE_HEIGHT))
+        return false;
+    return true;
+}
+
 function recalculateBallCoordinates(){
+    /// The function recalculates the ball coordinates after it hits the walls or the paddles
     ballX = ballX + ballSpeedX;
     ballY = ballY + ballSpeedY;
-    if (ballX + ballRadius / 2 > canvas.width) {
-        direction = -(ballSpeedX / Math.abs(ballSpeedX));
-        ballSpeedX = Math.floor((Math.random() * 5) + 5)
+    if(checkIfPaddleHit()) {
+        direction = -(ballSpeedX / Math.abs(ballSpeedX))
+        ballSpeedX = Math.floor(Math.random() + 5);
         ballSpeedX *= direction;
-        ballX = canvas.width - ballRadius / 2;
+        ballX = paddleX + PADDLE_WIDTH + BALL_RADIUS / 2;
+        console.log("BALL HIT!")
+        return
     }
-    if (ballX - ballRadius / 2 < 0) {
-        ballX = ballRadius;
+    // hits the right wall
+    if (ballX + BALL_RADIUS / 2 > canvas.width) {
         direction = -(ballSpeedX / Math.abs(ballSpeedX));
-        ballSpeedX = Math.floor((Math.random() * 5) + 5)
+        ballSpeedX = Math.floor((Math.random()) + 5);
+        ballSpeedX *= direction;
+        ballX = canvas.width - BALL_RADIUS / 2;
+    }
+
+    // hits the left wall
+    if (ballX - BALL_RADIUS / 2 < 0) {
+        ballX = BALL_RADIUS;
+        direction = -(ballSpeedX / Math.abs(ballSpeedX));
+        ballSpeedX = Math.floor((Math.random()) + 5)
         ballSpeedX *= direction;
     }
-    if(ballY + ballRadius / 2 > canvas.height){
+
+    // hits the top 
+    if(ballY + BALL_RADIUS / 2 > canvas.height){
         direction = -(ballSpeedY / Math.abs(ballSpeedY));
-        ballSpeedY = Math.floor((Math.random() * 5) + 5)
+        ballSpeedY = Math.floor((Math.random()) + 5)
         ballSpeedY *= direction;
-        ballY = canvas.height - ballRadius / 2;
+        ballY = canvas.height - BALL_RADIUS / 2;
     }
-    if(ballY - ballRadius / 2  < 0){
+
+    //hits the bottom
+    if(ballY - BALL_RADIUS / 2  < 0){
         direction = -(ballSpeedY / Math.abs(ballSpeedY));
-        ballSpeedY = Math.floor((Math.random() * 5) + 5)
+        ballSpeedY = Math.floor((Math.random()) + 5)
         ballSpeedY *= direction;
-        ballY = ballRadius / 2;
+        ballY = BALL_RADIUS / 2;
     }
 }
 
 function drawPaddle(){
+    // the function draws the player's paddle
     canvasContext.fillStyle = 'white'
-    canvasContext.fillRect(paddleX, paddleY, PADDLE_WIDTH, PADDLEE_HEIGHT);
+    canvasContext.fillRect(paddleX, paddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
 }
 
 function drawElements(){
+    // the functions draws all the elements in their current places
     drawBackground();
     drawPaddle();
-    colorCircle(ballX, ballY, ballRadius, 'white')
-    //console.log(ballX, ballY);
+    colorCircle(ballX, ballY, BALL_RADIUS, 'white')
 }
 
 function drawBackground(){
+    // This function draws the background of the game
     canvasContext.fillStyle = 'black'
     canvasContext.fillRect(0, 0, canvas.width, canvas.height)
 }
 
 function colorCircle(centerX, centerY, radius, color){
+    // This function draws the ball 
+    // Parameters:  centerX - integer
+    //              centerY - integer
+    //              radius - integer
+    //              color - string
     canvasContext.beginPath();
     canvasContext.fillStyle = color
     canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI)
