@@ -25,7 +25,7 @@ function initializeBallCoordinates() {
 
 function initializeBallSpeed(){
     ballSpeedX = 5;
-    ballSpeedY = 0;
+    ballSpeedY = 5;
 }
 
 function initializePaddleCoordinates(){
@@ -45,6 +45,7 @@ window.onload = function(){
         function(evt){
             var mousePos = calculateMousePosition(evt);
             paddleY = mousePos.y - PADDLE_HEIGHT / 2;
+            //paddleOpponentY = mousePos.y - PADDLE_HEIGHT / 2;
         })
 }
 
@@ -66,9 +67,18 @@ function calculateMousePosition(evt){
     };
 }
 
+function moveOpponentPaddle(){
+    if (ballY - paddleOpponentY < 0){
+        paddleOpponentY -= 10;
+    }
+    else if(ballY > paddleOpponentY + PADDLE_HEIGHT)
+        paddleOpponentY += 10;
+}
+
 function showEverything(){
     drawElements();
     recalculateBallCoordinates();
+    moveOpponentPaddle();
 }
 
 function checkIfPlayersPaddleHit(){
